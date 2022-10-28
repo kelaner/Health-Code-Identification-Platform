@@ -10,10 +10,10 @@ class Config:
         pass
 
     src = './img/demo.jpg'
-    resizeRate = 0.  # 缩放
+    resizeRate = 1.0  # 缩放
     min_area = 50000  # 区域面积
-    min_contours = 20  # 轮廓
-    threshold_thresh = 100  # 分类阈值
+    min_contours = 8  # 轮廓
+    threshold_thresh = 70  # 分类阈值
 
 
 # 预处理转为灰度图
@@ -112,7 +112,9 @@ for index, contour in enumerate(contours):
                 dtype="float32")
             M = cv2.getPerspectiveTransform(src_rect, dst_rect)
             warped = cv2.warpPerspective(image, M, (w, h))
-            cv2.imwrite(f"./output/{index}.jpg", warped, [int(cv2.IMWRITE_PNG_COMPRESSION), 9])
+            print(233)
+            cv2.imwrite(f"./output_demo/{index}.jpg", warped)
+            print(123)
 
             # 测试output
             plt.subplot(1, 3, 1)
@@ -131,4 +133,3 @@ for index, contour in enumerate(contours):
             break
 
 print('over')
-cv2.waitKey(0)

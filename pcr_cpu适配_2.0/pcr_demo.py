@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '3'
 # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
-src = "img_demo"
-# src = "../pcr3.0/output"
+# src = "img_demo"
+src = "../pcr3.0/output"
 
 # 文字识别
 results = hub.Module(name="chinese_ocr_db_crnn_mobile").recognize_text(
