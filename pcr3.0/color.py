@@ -49,8 +49,6 @@ for i in color_list:
     hsv = cv2.cvtColor(gs, cv2.COLOR_BGR2HSV)
     erode_hsv = cv2.erode(hsv, None, iterations=2)
     range_hsv = cv2.inRange(erode_hsv, color_dist[i]['Lower'], color_dist[i]['Upper'])
-    # cv2.imshow("demo", range_hsv)
-    # cv2.waitKey(0)
     contours, _ = cv2.findContours(range_hsv.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours.sort(key=cv2.contourArea, reverse=True)
     contours = contours[:5]

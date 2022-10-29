@@ -19,8 +19,8 @@ class Config:
 # 读取视频
 cap = cv2.VideoCapture(Config.src)
 # cap = cv2.VideoCapture(0)
-w, h = None, None
-out = None
+# w, h = None, None
+# out = None
 
 # cap.set(cv2.CAP_PROP_POS_FRAMES, 10)
 # frames_num = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -38,15 +38,15 @@ while cap.isOpened():
     if frame is None:
         break
 
-    # frame = imutils.resize(frame, width=750)
-    # frame = imutils.rotate_bound(frame, 90)
+    frame = imutils.resize(frame, width=750)
+    frame = imutils.rotate_bound(frame, 90)
 
-    if out is None:
-        fps = int(cap.get(cv2.CAP_PROP_FPS))
-        if not os.path.exists("./video/result"):
-            os.mkdir("./video/result")
-        (h, w) = frame.shape[:2]
-        out = cv2.VideoWriter('./video/result/demo.mp4', cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
+    # if out is None:
+    #     fps = int(cap.get(cv2.CAP_PROP_FPS))
+    #     if not os.path.exists("./video/result"):
+    #         os.mkdir("./video/result")
+    #     (h, w) = frame.shape[:2]
+    #     out = cv2.VideoWriter('./video/result/demo.mp4', cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
 
     if ret:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -124,8 +124,8 @@ while cap.isOpened():
         # M = cv2.getPerspectiveTransform(src_rect, dst_rect)
         # warped = cv2.warpPerspective(frame, M, (w, h))
 
-        output = frame
-        out.write(output)
+        # output = frame
+        # out.write(output)
 
         cv2.imshow("frame", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -133,5 +133,5 @@ while cap.isOpened():
 
 # 释放资源
 cap.release()
-out.release()
+# out.release()
 cv2.destroyAllWindows()
