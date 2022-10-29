@@ -9,14 +9,8 @@ import matplotlib.pyplot as plt
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '3'
 # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
-# src = "img_demo"
-src = "../pcr3.0/output"
-
-# 文字识别
-results = hub.Module(name="chinese_ocr_db_crnn_mobile").recognize_text(
-    images=[cv2.imread(image_path) for image_path in glob.glob(f"{src}/*.jpg")],
-    use_gpu=False, output_dir='demo_result',
-    visualization=True, box_thresh=0.5, text_thresh=0.5)
+src = "img_demo"
+# src = "../pcr3.0/output"
 
 # 颜色判断
 color_dist = {
@@ -29,53 +23,22 @@ color_dist = {
 def read_path(file_path):
     for filename in os.listdir(file_path):
         img = cv2.imread(file_path + '/' + filename, 1)
-        qr = img[400:650, 100:350]
-        qr_1 = img[150:240, 30:90]
-        qr_2 = img[150:240, 120:180]
-        qr_3 = img[150:240, 200:260]
-        qr_4 = img[150:240, 290:350]
-        qr_5 = img[150:240, 370:440]
+        qr = img[450:650, 150:350]
 
         # 选取区域展示
-        # img = img[:, :, [2, 1, 0]]
-        # plt.subplot(1, 2, 1)
-        # plt.imshow(img)
-        # plt.axis('off')
-        # plt.subplot(1, 2, 2)
-        # plt.imshow(qr)
-        # plt.axis('off')
-        # plt.show()
-        # img = img[:, :, [2, 1, 0]]
+        img = img[:, :, [2, 1, 0]]
+        plt.subplot(1, 2, 1)
+        plt.imshow(img)
+        plt.axis('off')
+        plt.subplot(1, 2, 2)
+        plt.imshow(qr)
+        plt.axis('off')
+        plt.show()
 
         for i in color_dist.keys():
             k = detect_color(qr, i)
             if k:
                 qr_color.append(i)
-
-        for i in color_dist.keys():
-            k = detect_color(qr_1, i)
-            if k:
-                qr_color_1.append(i)
-
-        for i in color_dist.keys():
-            k = detect_color(qr_2, i)
-            if k:
-                qr_color_2.append(i)
-
-        for i in color_dist.keys():
-            k = detect_color(qr_3, i)
-            if k:
-                qr_color_3.append(i)
-
-        for i in color_dist.keys():
-            k = detect_color(qr_4, i)
-            if k:
-                qr_color_4.append(i)
-
-        for i in color_dist.keys():
-            k = detect_color(qr_5, i)
-            if k:
-                qr_color_5.append(i)
 
 
 def detect_color(image, color):
@@ -92,7 +55,13 @@ def detect_color(image, color):
 
 qr_color = []
 qr_color_1, qr_color_2, qr_color_3, qr_color_4, qr_color_5 = [], [], [], [], []
-read_path("img_demo")
+read_path(src)
+
+# 文字识别
+results = hub.Module(name="chinese_ocr_db_crnn_mobile").recognize_text(
+    images=[cv2.imread(image_path) for image_path in glob.glob(f"{src}/*.jpg")],
+    use_gpu=False, output_dir='demo_result',
+    visualization=True, box_thresh=0.5, text_thresh=0.5)
 
 # 表格填充
 with open('demo_result.csv', 'w', encoding='utf-8-sig') as f:
@@ -122,11 +91,11 @@ with open('demo_result.csv', 'w', encoding='utf-8-sig') as f:
         data[2] += ','
         data[3] = data[3][5:]
         k = results.index(result)
-        data.append(qr_color[k]+',')
-        data.append(qr_color_1[k]+',')
-        data.append(qr_color_2[k]+',')
-        data.append(qr_color_3[k]+',')
-        data.append(qr_color_4[k]+',')
-        data.append(qr_color_5[k]+',')
+        data.append(qr_color[k] + ',')
+        # data.append(qr_color_1[k] + ',')
+        # data.append(qr_color_2[k] + ',')
+        # data.append(qr_color_3[k] + ',')
+        # data.append(qr_color_4[k] + ',')
+        # data.append(qr_color_5[k] + ',')
         # print(data)
         f.write(''.join(data) + "\n")

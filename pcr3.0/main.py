@@ -1,11 +1,7 @@
-import os
 import cv2
 import math
-import glob
 import imutils
 import numpy as np
-import paddlehub as hub
-import matplotlib.pyplot as plt
 
 
 class Config:
@@ -17,17 +13,6 @@ class Config:
     min_area = 50000  # 区域面积
     min_contours = 8  # 轮廓
     threshold_thresh = 90  # 分类阈值
-
-
-color_list = ['green', 'orange']
-
-color_dist = {
-    'orange': {'Lower': np.array([11, 43, 46]), 'Upper': np.array([25, 255, 255])},
-    'blue': {'Lower': np.array([100, 43, 46]), 'Upper': np.array([124, 255, 255])},
-    'green': {'Lower': np.array([35, 43, 35]), 'Upper': np.array([90, 255, 255])},
-    'yellow': {'Lower': np.array([26, 43, 46]), 'Upper': np.array([34, 255, 255])},
-    'red': {'Lower': np.array([0, 43, 46]), 'Upper': np.array([0, 255, 255])},
-}
 
 
 # 坐标点排序 [top-left, top-right, bottom-right, bottom-left]

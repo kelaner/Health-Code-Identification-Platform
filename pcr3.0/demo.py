@@ -13,7 +13,7 @@ class Config:
     resizeRate = 0.5  # 缩放
     min_area = 5000  # 区域面积
     min_contours = 8  # 轮廓
-    threshold_thresh = 100  # 分类阈值
+    threshold_thresh = 70  # 分类阈值
     epsilon_start = 10  # 角点
     epsilon_step = 10
 
