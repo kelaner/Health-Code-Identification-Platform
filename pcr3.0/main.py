@@ -60,7 +60,7 @@ def draw_area(frame, src_rect):
 
 
 # 透视变换
-def get_warped(w, h, src_rect):
+def get_warped(w, h, src_rect, frame):
     dst_rect = np.array([
         [0, 0],
         [w, 0],
@@ -72,51 +72,58 @@ def get_warped(w, h, src_rect):
     return warped
 
 
-# 读取视频
-cap = cv2.VideoCapture(Config.src)
-# cap = cv2.VideoCapture(0)
-
-while cap.isOpened():
-    ret, frame = cap.read()
-    if frame is None:
-        break
-
-    frame = imutils.resize(frame, width=750)
-    frame = imutils.rotate_bound(frame, 90)
-
-    if ret:
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        binary = cv2.medianBlur(gray, 7)
-        ret, binary = cv2.threshold(binary, Config.threshold_thresh, 255, cv2.THRESH_BINARY)
-        binary = cv2.erode(binary, None, iterations=2)
-        binary = cv2.Canny(binary, 0, 60, apertureSize=3)
-        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours.sort(key=cv2.contourArea, reverse=True)
-        contours = contours[:1]
-
-        for index, contour in enumerate(contours):
-            if len(contour) < Config.min_contours:
-                break
-            while True:
-                if contour is None:
-                    break
-                if len(contour) < 4:
-                    break
-                src_rect, the_area = get_rect(contour)
-
-                if the_area > Config.min_area:
-                    w, h = point_distance(src_rect[0], src_rect[1]), point_distance(src_rect[1], src_rect[2])
-                    if w > h:
-                        break
-                    draw_area(frame, src_rect)
-                    warped = get_warped(w, h, src_rect)
-                    cv2.imshow("warped", warped)
-                break
-
-        cv2.imshow("frame", frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+# CV识别
+def get_shape(cap):
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if frame is None:
             break
 
-# 释放资源
-cap.release()
-cv2.destroyAllWindows()
+        frame = imutils.resize(frame, width=750)
+        frame = imutils.rotate_bound(frame, 90)
+
+        if ret:
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            binary = cv2.medianBlur(gray, 7)
+            ret, binary = cv2.threshold(binary, Config.threshold_thresh, 255, cv2.THRESH_BINARY)
+            binary = cv2.erode(binary, None, iterations=2)
+            binary = cv2.Canny(binary, 0, 60, apertureSize=3)
+            contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            contours.sort(key=cv2.contourArea, reverse=True)
+            contours = contours[:1]
+
+            for index, contour in enumerate(contours):
+                if len(contour) < Config.min_contours:
+                    break
+                while True:
+                    if contour is None:
+                        break
+                    if len(contour) < 4:
+                        break
+                    src_rect, the_area = get_rect(contour)
+
+                    if the_area > Config.min_area:
+                        w, h = point_distance(src_rect[0], src_rect[1]), point_distance(src_rect[1], src_rect[2])
+                        if w > h:
+                            break
+                        draw_area(frame, src_rect)
+                        warped = get_warped(w, h, src_rect, frame)
+                        cv2.imshow("warped", warped)
+                    break
+
+            cv2.imshow("frame", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+
+if __name__ == '__main__':
+    # 读取视频
+    cap = cv2.VideoCapture(Config.src)  # 读取本地测试视频
+    # cap = cv2.VideoCapture(0)  # 调用摄像设备
+
+    # CV识别
+    get_shape(cap)
+
+    # 释放资源
+    cap.release()
+    cv2.destroyAllWindows()
