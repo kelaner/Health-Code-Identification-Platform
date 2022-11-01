@@ -1,6 +1,8 @@
+import os
 import cv2
 import math
 import imutils
+import datetime
 import numpy as np
 
 
@@ -11,7 +13,7 @@ class Config:
     src = "./video/demo.mp4"
     resizeRate = 1.0  # 缩放
     min_area = 50000  # 区域面积
-    min_contours = 8  # 轮廓
+    min_contours = 20  # 轮廓
     threshold_thresh = 90  # 分类阈值
 
 
@@ -108,7 +110,12 @@ def get_shape(cap):
                             break
                         draw_area(frame, src_rect)
                         warped = get_warped(w, h, src_rect, frame)
+                        if not os.path.exists("./output/temp"):
+                            os.mkdir("./output/temp")
+                        time = int(datetime.datetime.now().strftime('%H%M%S'))
+                        temp_i = f"{index}_{time}.jpg"
                         cv2.imshow("warped", warped)
+                        cv2.imwrite(f"./output/temp/{temp_i}", warped, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
                     break
 
             cv2.imshow("frame", frame)
@@ -117,9 +124,18 @@ def get_shape(cap):
 
 
 if __name__ == '__main__':
+
+    # 清理缓存
+    if os.path.exists("./output/temp/"):
+        for i in os.listdir("./output/temp/"):
+            path = os.path.join("./output/temp/", i)
+            os.remove(path)
+
     # 读取视频
     cap = cv2.VideoCapture(Config.src)  # 读取本地测试视频
     # cap = cv2.VideoCapture(0)  # 调用摄像设备
+    # video = "http://192.168.1.100:4747/video"
+    # cap = cv2.VideoCapture(video)
 
     # CV识别
     get_shape(cap)

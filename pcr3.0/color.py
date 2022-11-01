@@ -1,9 +1,7 @@
 import os
 import cv2
 import math
-import glob
 import numpy as np
-import paddlehub as hub
 import matplotlib.pyplot as plt
 
 
@@ -11,7 +9,7 @@ class Config:
     def __init__(self):
         pass
 
-    src = "./output/0.jpg"
+    src = "./output/1/0.jpg"
 
 
 color_list = ['orange', 'green']
@@ -84,8 +82,8 @@ def get_five_color(image, camera_image):
                     [w, h],
                     [0, h]],
                     dtype="float32")
-                M = cv2.getPerspectiveTransform(src_rect, dst_rect)
-                warped = cv2.warpPerspective(camera_image, M, (w, h))
+                m = cv2.getPerspectiveTransform(src_rect, dst_rect)
+                warped = cv2.warpPerspective(camera_image, m, (w, h))
                 # cv2.imshow("demo", warped)
                 # cv2.waitKey(0)
                 if not os.path.exists("./camera"):
@@ -97,10 +95,6 @@ def get_five_color(image, camera_image):
                 plt.imshow(warped)
                 plt.axis('off')
                 plt.savefig(f"./camera/{i}/{index}.png")
-        results = hub.Module(name="chinese_ocr_db_crnn_server").recognize_text(
-            images=[cv2.imread(image_path) for image_path in glob.glob(f"./camera/{i}/*.png")],
-            use_gpu=False, output_dir=f'./camera/{i}/result',
-            visualization=True, box_thresh=0.5, text_thresh=0.5, angle_classification_thresh=0.9)
 
 
 if __name__ == '__main__':
