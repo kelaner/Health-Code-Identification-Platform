@@ -13,7 +13,7 @@ class Config:
     src = "./video/demo.mp4"
     resizeRate = 1.0  # 缩放
     min_area = 50000  # 区域面积
-    min_contours = 20  # 轮廓
+    min_contours = 100  # 轮廓
     threshold_thresh = 90  # 分类阈值
 
 
@@ -124,12 +124,6 @@ def get_shape(cap):
 
 
 if __name__ == '__main__':
-
-    # 清理缓存
-    if os.path.exists("./output/temp/"):
-        for i in os.listdir("./output/temp/"):
-            path = os.path.join("./output/temp/", i)
-            os.remove(path)
 
     # 读取视频
     cap = cv2.VideoCapture(Config.src)  # 读取本地测试视频

@@ -1,23 +1,21 @@
 import cv2
-import glob
 import os
-import re
 import pyttsx3
 import shutil
 import numpy as np
-import paddlehub as hub
+import pyzbar.pyzbar as pyzbar
 
 
 class Config:
     def __init__(self):
         pass
 
-    src = "./output/1/"
-    root_dir = "./output/temp/"
+    src = "./output/temp/"
+    # root_dir = "./output/temp/"
     qr_color = []
     color_dist = {
-        '红码': {'Lower': np.array([0, 60, 60]), 'Upper': np.array([6, 255, 255])},
         '绿码': {'Lower': np.array([35, 43, 35]), 'Upper': np.array([90, 255, 255])},
+        '红码': {'Lower': np.array([0, 60, 60]), 'Upper': np.array([6, 255, 255])},
         '黄码': {'Lower': np.array([26, 43, 46]), 'Upper': np.array([34, 255, 255])},
     }
     engine = pyttsx3.init()
@@ -26,18 +24,20 @@ class Config:
 def get_voice():
     Config.engine.setProperty('rate', 150)  # 设置语速
     Config.engine.setProperty('volume', 1.0)  # 设置音量
-    voices = Config.engine.getProperty('voices')
-    Config.engine.setProperty('voice', voices[0].id)
 
 
-def change_temp():
-    for i in os.listdir(Config.root_dir):
-        full_path = os.path.join(Config.root_dir, i)
-        aim_dir = "./output/1/"
-        if not os.path.exists(aim_dir):
-            os.mkdir(aim_dir)
-        shutil.move(full_path, aim_dir)
-        break
+# def change_temp():
+#     try:
+#         if os.path.exists(Config.root_dir):
+#             for i in os.listdir(Config.root_dir):
+#                 full_path = os.path.join(Config.root_dir, i)
+#                 aim_dir = "./output/1/"
+#                 if not os.path.exists(aim_dir):
+#                     os.mkdir(aim_dir)
+#                 shutil.move(full_path, aim_dir)
+#                 break
+#     except:
+#         pass
 
 
 def clean_temp():
@@ -46,25 +46,55 @@ def clean_temp():
         os.remove(path)
 
 
+# 坐标点排序 [top-left, top-right, bottom-right, bottom-left]
+def order_points(pts):
+    rect = np.zeros((4, 2), dtype="float32")
+    rect[0] = pts[0]
+    rect[2] = pts[2]
+    rect[1] = pts[1]
+    rect[3] = pts[3]
+    return rect
+
+
+def point_distance(a, b):
+    return int(np.sqrt(np.sum(np.square(a - b))))
+
+
 def read_path(file_path):
     for filename in os.listdir(file_path):
         img = cv2.imread(file_path + filename, 1)
-        qr = img[450:650, 150:350]
+        # cv2.imshow('img', img)
+        # cv2.waitKey(0)
+        # qr = img[450:650, 150:350]
 
-        # 选取区域展示
-        # img = img[:, :, [2, 1, 0]]
-        # plt.subplot(1, 2, 1)
-        # plt.imshow(img)
-        # plt.axis('off')
-        # plt.subplot(1, 2, 2)
-        # plt.imshow(qr)
-        # plt.axis('off')
-        # plt.show()
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        barcodes = pyzbar.decode(gray)
+        for barcode in barcodes:
+            points = []
+            for point in barcode.polygon:
+                points.append([point[0], point[1]])
+            src_rect = order_points(points)
+            points = np.array(points, dtype=np.int32).reshape(-1, 1)
+            # 框出二维码
+            # cv2.polylines(img, [points], isClosed=True, color=(0, 0, 255), thickness=2)
+            w, h = point_distance(points[0], points[1]), point_distance(points[1], points[2])
+            dst_rect = np.array([
+                [0, 0],
+                [w - 1, 0],
+                [w - 1, h - 1],
+                [0, h - 1]],
+                dtype="float32")
+            m = cv2.getPerspectiveTransform(src_rect, dst_rect)
+            qr = cv2.warpPerspective(img, m, (w, h))
 
-        for i in Config.color_dist.keys():
-            k = detect_color(qr, i)
-            if k:
-                Config.qr_color.append(i)
+            # cv2.imshow("QR", qr)
+            # cv2.waitKey(0)
+
+            for i in Config.color_dist.keys():
+                k = detect_color(qr, i)
+                if k:
+                    Config.qr_color.append(i)
+            break
 
 
 def detect_color(image, color):
@@ -74,79 +104,34 @@ def detect_color(image, color):
         erode_hsv = cv2.erode(hsv, None, iterations=2)
         range_hsv = cv2.inRange(erode_hsv, Config.color_dist[color]['Lower'], Config.color_dist[color]['Upper'])
         contours = cv2.findContours(range_hsv.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
-        if len(contours) > 0:
+        if len(contours) > 1:
             return True
         else:
             return False
+
     except:
         return None
 
 
 def get_info():
     try:
-        image_list = [cv2.imread(image_path) for image_path in glob.glob(f"{Config.src}*.jpg")]
-        print(type(image_list[0]))
-        if os.path.exists("./demo_result/"):
-            for i in os.listdir("./demo_result/"):
-                path = os.path.join("./demo_result/", i)
-                os.remove(path)
-
-        # 文字识别
-        results = hub.Module(name="chinese_ocr_db_crnn_mobile").recognize_text(
-            images=image_list,
-            use_gpu=False, output_dir='demo_result',
-            visualization=True, box_thresh=0.5, text_thresh=0.5)
-    except:
-        pass
-
-    try:
-        if not os.path.exists("demo_result.csv"):
-            with open('demo_result.csv', 'w', encoding='utf-8-sig') as f:
-                f.write('姓名,时间,检测日期,场所,健康码状态,24h,48h,72h,6天内,7天内\n')
-
         # 表格填充
         with open('demo_result.csv', 'a+', encoding='utf-8-sig') as f:
-            name = re.compile(r'[\u4e00-\u9fa5]{2,4}（[\u4e00-\u9fa5]{2}）')
-            time = re.compile(r'[0-9]{2}:[0-9]{2}:[0-9]{2}')
-            dates = re.compile(r'[0-9]{4}-[0-9]{2}-[0-9]{2}')
-            place = re.compile(r'[\u4e00-\u9fa5]{4}：[\u4e00-\u9fa5]{2,}')
-            for result in results:
-                data = [i['text'] + "," if (
-                        name.match(i['text'])
-                        or time.match(i['text'])
-                        or dates.search(i['text'])
-                        or place.match(i['text'])) else ''
-                        for i in result['data']]
-                date = data.copy()
-                for i in date:
-                    if i == '':
-                        data.remove(i)
-                for i in range(len(data[0])):
-                    if data[0][i] == '（':
-                        data[0] = data[0][:i]
-                        data[0] += ','
-                        break
-                # print(data)
-                data[2] = data[2][5:15]
-                data[2] += ','
-                data[3] = data[3][5:]
-                k = results.index(result)
 
-                data.append(Config.qr_color[k] + ',')
-                # print(data)
-                f.write(''.join(data) + "\n")
-                print(Config.qr_color[k])
-                Config.engine.say(Config.qr_color[k])
-                Config.engine.runAndWait()
+            a = Config.qr_color.pop()
+            f.write(a + "\n")
+            Config.engine.say(a)
+            Config.engine.runAndWait()
     except:
         pass
 
 
 if __name__ == '__main__':
-    clean_temp()
+    # clean_temp()
     get_voice()
     # while True:
-    change_temp()
+    # change_temp()
     read_path(Config.src)
     get_info()
     clean_temp()
+    Config.qr_color = []

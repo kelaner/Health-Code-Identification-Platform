@@ -9,7 +9,7 @@ class Config:
     def __init__(self):
         pass
 
-    src = "./output/1/0.jpg"
+    src = "./output/1/demo_2.jpg"
 
 
 color_list = ['orange', 'green']
@@ -78,9 +78,9 @@ def get_five_color(image, camera_image):
                 # 透视变换
                 dst_rect = np.array([
                     [0, 0],
-                    [w, 0],
-                    [w, h],
-                    [0, h]],
+                    [w-1, 0],
+                    [w-1, h-1],
+                    [0, h-1]],
                     dtype="float32")
                 m = cv2.getPerspectiveTransform(src_rect, dst_rect)
                 warped = cv2.warpPerspective(camera_image, m, (w, h))
