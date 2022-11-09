@@ -4,6 +4,8 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/pcr1.0" />
       <excludeFolder url="file://$MODULE_DIR$/pcr_cpu适配_2.0" />
+      <excludeFolder url="file://$MODULE_DIR$/pcr3.0/video" />
+      <excludeFolder url="file://$MODULE_DIR$/video" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.9 (paddle) (2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
