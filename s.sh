@@ -8,7 +8,7 @@ python clean_temp.py
 while :
 do
   echo "Get"
-  python scanner.py
+  python scan.py
 done
 
 

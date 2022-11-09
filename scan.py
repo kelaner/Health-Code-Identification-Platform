@@ -1,12 +1,9 @@
 import re
 import os
-import time
-
 import cv2
 import logging
 import pyttsx3
 import winsound
-
 import numpy as np
 import pyzbar.pyzbar as pyzbar
 from paddleocr import PaddleOCR
@@ -36,11 +33,6 @@ def get_voice():
     Config.engine.setProperty('volume', 2.0)  # 设置音量
 
 
-def begin_system():
-    Config.engine.say("系统启动")
-    Config.engine.runAndWait()
-
-
 def clean_temp():
     if not os.path.exists(Config.src):
         os.mkdir(Config.src)
@@ -53,37 +45,26 @@ def clean_temp():
             pass
 
 
-def judge_card(file_path):
-    for filename in os.listdir(file_path):
-        file = file_path + filename
+def judge_card():
+    for filename in os.listdir(Config.src):
+
+        img = cv2.imread(Config.src + filename, 1)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        barcodes = pyzbar.decode(gray)
+
         winsound.Beep(600, 500)
-        result = Config.ocr.ocr(file, cls=True)
-        qr = re.compile(r'核酸[\u4e00-\u9fa5]{1,2}结果')
-        star = re.compile(r'[\u4e00-\u9fa5]{2}大数据行程卡')
-        # for idx in result:
-        #     for line in idx:
-        #         print(line[1][0])
+        if barcodes:
+            print("识别到健康码")
+            Config.engine.say("识别到健康码")
+            Config.engine.runAndWait()
+            return "qr", img, barcodes
+        else:
+            return "star", filename, 0
 
-        for i in result:
-            for line in i:
-                if qr.match(line[1][0]):
-                    return "qr", filename
-                elif star.match(line[1][0]):
-                    print("识别到行程卡")
-                    Config.engine.say("识别到行程卡")
-                    Config.engine.runAndWait()
-                    return "star", result
-    return "None", 0
+    return "None", 0, 0
 
 
-def qr_scan(filename):
-    img = cv2.imread(Config.src + filename, 1)
-    # cv2.imshow('img', img)
-    # cv2.waitKey(0)
-
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    barcodes = pyzbar.decode(gray)
-
+def qr_scan(img, barcodes):
     for barcode in barcodes:
         points = []
         for point in barcode.polygon:
@@ -111,7 +92,10 @@ def qr_scan(filename):
             k = detect_color(qr, i)
             if k:
                 Config.qr_color.append(i)
-                get_info()
+                a = Config.qr_color.pop()
+                print(a)
+                Config.engine.say(a)
+                Config.engine.runAndWait()
         break
 
 
@@ -146,7 +130,22 @@ def detect_color(image, color):
         return None
 
 
-def star_scan(result):
+def star_scan(filename):
+    file = Config.src + filename
+    result = Config.ocr.ocr(file, cls=True)
+    star = re.compile(r'[\u4e00-\u9fa5]{2}大数据行程卡')
+
+    t = 0
+    for i in result:
+        for line in i:
+            if star.match(line[1][0]):
+                print("识别到行程卡")
+                Config.engine.say("识别到行程卡")
+                Config.engine.runAndWait()
+                t = 1
+                break
+    if t == 0:
+        return 0
     star = re.compile(r'[\u4e00-\u9fa5]{2,9}[*]?')
     data = [line[1][0] if (
         star.search(line[1][0])
@@ -170,38 +169,19 @@ def star_scan(result):
         print("未带星号")
         Config.engine.say("行程卡未带星号")
         Config.engine.runAndWait()
-
-
-def get_info():
-    # noinspection PyBroadException
-    try:
-        # 表格填充
-        # with open('demo_result.csv', 'a+', encoding='utf-8-sig') as f:
-        a = Config.qr_color.pop()
-        # f.write(a + "\n")
-        print("识别到健康码")
-        Config.engine.say("识别到健康码")
-        Config.engine.runAndWait()
-        print(a)
-        Config.engine.say(a)
-        Config.engine.runAndWait()
-    except Exception:
-        pass
+    return 1
 
 
 if __name__ == '__main__':
-    # clean_temp()
     get_voice()
-    # begin_system()
     # while True:
-    flag, f = judge_card(Config.src)
-    # print(flag, f)
+    flag, a, b = judge_card()
+    # print(flag)
+
     if flag == "qr":
-        qr_scan(f)
+        qr_scan(a, b)
         clean_temp()
         Config.qr_color = []
     elif flag == "star":
-        star_scan(f)
-        clean_temp()
-    else:
+        star_scan(a)
         clean_temp()
