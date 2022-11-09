@@ -1,5 +1,7 @@
 import re
 import os
+import time
+
 import cv2
 import logging
 import pyttsx3
@@ -19,7 +21,6 @@ class Config:
         pass
 
     src = "./output/temp/"
-    # root_dir = "./output/temp/"
     qr_color = []
     color_dist = {
         '绿码': {'Lower': np.array([35, 43, 35]), 'Upper': np.array([90, 255, 255])},
@@ -197,10 +198,10 @@ if __name__ == '__main__':
     # print(flag, f)
     if flag == "qr":
         qr_scan(f)
-        # clean_temp()
+        clean_temp()
         Config.qr_color = []
     elif flag == "star":
         star_scan(f)
-        # clean_temp()
-    # else:
-        # clean_temp()
+        clean_temp()
+    else:
+        clean_temp()

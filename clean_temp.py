@@ -11,7 +11,11 @@ class Config:
 def clean_temp():
     for i in os.listdir(Config.src):
         path = os.path.join(Config.src, i)
-        os.remove(path)
+        # noinspection PyBroadException
+        try:
+            os.remove(path)
+        except Exception:
+            pass
 
 
 if __name__ == '__main__':

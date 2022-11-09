@@ -1,7 +1,6 @@
 import os
 import cv2
 import math
-import shutil
 import imutils
 import datetime
 import numpy as np
@@ -117,12 +116,6 @@ def get_shape(cap):
                         temp_i = f"{index}_{time}.jpg"
                         cv2.imshow("warped", warped)
                         cv2.imwrite(f"./output/temp/{temp_i}", warped, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
-
-                        # full_path = f"./output/temp/{temp_i}"
-                        # aim_dir = "./output/scan_temp"
-                        # if not os.path.exists(aim_dir):
-                        #     os.mkdir(aim_dir)
-                        # shutil.move(full_path, aim_dir)
                     break
 
         cv2.imshow("frame", frame)
