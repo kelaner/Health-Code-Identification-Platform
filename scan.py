@@ -47,12 +47,11 @@ def clean_temp():
 
 def judge_card():
     for filename in os.listdir(Config.src):
-
+        winsound.Beep(600, 300)
         img = cv2.imread(Config.src + filename, 1)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         barcodes = pyzbar.decode(gray)
 
-        winsound.Beep(600, 500)
         if barcodes:
             print("识别到健康码")
             Config.engine.say("识别到健康码")
