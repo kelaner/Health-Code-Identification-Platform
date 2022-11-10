@@ -9,13 +9,13 @@ class Config:
     def __init__(self):
         pass
 
-    src = "./output/1/demo_2.jpg"
+    src = "./output/demo/0_191025.jpg"
 
 
 color_list = ['orange', 'green']
 
 color_dist = {
-    'orange': {'Lower': np.array([11, 43, 46]), 'Upper': np.array([25, 255, 255])},
+    'orange': {'Lower': np.array([0, 43, 46]), 'Upper': np.array([25, 255, 255])},
     'blue': {'Lower': np.array([100, 43, 46]), 'Upper': np.array([124, 255, 255])},
     'green': {'Lower': np.array([35, 43, 35]), 'Upper': np.array([90, 255, 255])},
     'yellow': {'Lower': np.array([26, 43, 46]), 'Upper': np.array([34, 255, 255])},
@@ -45,9 +45,11 @@ def get_five_color(image, camera_image):
         hsv = cv2.cvtColor(gs, cv2.COLOR_BGR2HSV)
         erode_hsv = cv2.erode(hsv, None, iterations=2)
         range_hsv = cv2.inRange(erode_hsv, color_dist[i]['Lower'], color_dist[i]['Upper'])
+        # cv2.imshow('hsv', range_hsv)
+        # cv2.waitKey(0)
         contours, _ = cv2.findContours(range_hsv.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours.sort(key=cv2.contourArea, reverse=True)
-        contours = contours[:5]
+        contours = contours[:6]
 
         for index, contour in enumerate(contours):
             # c = max(contours, key=cv2.contourArea)
@@ -62,7 +64,7 @@ def get_five_color(image, camera_image):
             src_rect = order_points(box)
             the_area = math.fabs(cv2.contourArea(src_rect))
 
-            if the_area > 500:
+            if 1000 < the_area:
                 w, h = point_distance(src_rect[0], src_rect[1]), point_distance(src_rect[1], src_rect[2])
                 print("w,h=%d,%d" % (w, h))
 
@@ -78,9 +80,9 @@ def get_five_color(image, camera_image):
                 # 透视变换
                 dst_rect = np.array([
                     [0, 0],
-                    [w-1, 0],
-                    [w-1, h-1],
-                    [0, h-1]],
+                    [w - 1, 0],
+                    [w - 1, h - 1],
+                    [0, h - 1]],
                     dtype="float32")
                 m = cv2.getPerspectiveTransform(src_rect, dst_rect)
                 warped = cv2.warpPerspective(camera_image, m, (w, h))

@@ -10,11 +10,11 @@ class Config:
     def __init__(self):
         pass
 
-    src = "./video/demo.mp4"
+    src = "./video/demo1.mp4"
     resizeRate = 1.0  # 缩放
     min_area = 50000  # 区域面积
     min_contours = 100  # 轮廓
-    threshold_thresh = 80  # 分类阈值
+    threshold_thresh = 85  # 分类阈值
 
 
 # 坐标点排序 [top-left, top-right, bottom-right, bottom-left]
@@ -108,8 +108,9 @@ def get_shape(cap):
                         w, h = point_distance(src_rect[0], src_rect[1]), point_distance(src_rect[1], src_rect[2])
                         if w > h:
                             break
+                        photo = frame.copy()
                         draw_area(frame, src_rect)
-                        warped = get_warped(w, h, src_rect, frame)
+                        warped = get_warped(w, h, src_rect, photo)
                         if not os.path.exists("./output/temp"):
                             os.mkdir("./output/temp")
                         time = int(datetime.datetime.now().strftime('%H%M%S'))
