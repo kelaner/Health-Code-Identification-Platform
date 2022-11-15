@@ -1,11 +1,13 @@
 import re
 import os
 import cv2
+import math
 import logging
 import pyttsx3
 import winsound
 import numpy as np
 import pyzbar.pyzbar as pyzbar
+import matplotlib.pyplot as plt
 from paddleocr import PaddleOCR
 
 # 关闭DEBUG和WARNING
@@ -26,6 +28,11 @@ class Config:
     }
     engine = pyttsx3.init()
     ocr = PaddleOCR(use_angle_cls=True, lang="ch")
+    color_list = ['orange']
+    color_num_list = {
+        'orange': {'Lower': np.array([0, 43, 46]), 'Upper': np.array([25, 255, 255])},
+        'green': {'Lower': np.array([35, 43, 35]), 'Upper': np.array([90, 255, 255])},
+    }
 
 
 def get_voice():
@@ -132,12 +139,15 @@ def detect_color(image, color):
 def star_scan(filename):
     file = Config.src + filename
     result = Config.ocr.ocr(file, cls=True)
-    star = re.compile(r'[\u4e00-\u9fa5]{2}大数据行程卡')
+    for i in result:
+        for j in i:
+            print(j)
+    star = re.compile(r'[\u4e00-\u9fa5]{7}卡')
 
     t = 0
     for i in result:
         for line in i:
-            if star.match(line[1][0]):
+            if star.search(line[1][0]):
                 print("识别到行程卡")
                 Config.engine.say("识别到行程卡")
                 Config.engine.runAndWait()
@@ -145,7 +155,7 @@ def star_scan(filename):
                 break
     if t == 0:
         return 0
-    star = re.compile(r'[\u4e00-\u9fa5]{2,9}[*]?')
+    star = re.compile(r'[\u4e00-\u9fa5]{1,9}[*]?')
     data = [line[1][0] if (
         star.search(line[1][0])
     ) else '' for i in result for line in i]
@@ -171,6 +181,58 @@ def star_scan(filename):
     return 1
 
 
+def color_num(image):
+    orange = []
+    for i in Config.color_list:
+        gs = cv2.GaussianBlur(image, (5, 5), 0)
+        hsv = cv2.cvtColor(gs, cv2.COLOR_BGR2HSV)
+        erode_hsv = cv2.erode(hsv, None, iterations=2)
+        range_hsv = cv2.inRange(erode_hsv, Config.color_num_list[i]['Lower'], Config.color_num_list[i]['Upper'])
+        # cv2.imshow('hsv', range_hsv)
+        # cv2.waitKey(0)
+        contours, _ = cv2.findContours(range_hsv.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours.sort(key=cv2.contourArea, reverse=True)
+        contours = contours[:5]
+        for index, contour in enumerate(contours):
+            # c = max(contours, key=cv2.contourArea)
+            # print('c:',c)
+            rect = cv2.minAreaRect(contour)
+            box = cv2.boxPoints(rect)
+            box = np.int0(box)
+            # cv2.drawContours(image, [box], -1, (255, 100, 100), 2)
+            # cv2.imshow('camera', image)
+            # cv2.waitKey(0)
+            box = box.reshape(4, 2)
+            src_rect = order_points(box)
+            the_area = math.fabs(cv2.contourArea(src_rect))
+            if 1000 < the_area:
+                orange.append(contour)
+    if len(orange) == 0:
+        print("24h内为绿码")
+        Config.engine.say("24小时内为绿码")
+        Config.engine.runAndWait()
+    elif len(orange) == 1:
+        print("24h内为橙码")
+        Config.engine.say("24小时内为橙码")
+        Config.engine.runAndWait()
+    elif len(orange) == 2:
+        print("48h内为橙码")
+        Config.engine.say("48小时内为橙码")
+        Config.engine.runAndWait()
+    elif len(orange) == 3:
+        print("72h内为橙码")
+        Config.engine.say("72小时内为橙码")
+        Config.engine.runAndWait()
+    elif len(orange) == 4:
+        print("6天内为橙码")
+        Config.engine.say("6天内为橙码")
+        Config.engine.runAndWait()
+    else:
+        print("7天内为橙码")
+        Config.engine.say("7天内为橙码")
+        Config.engine.runAndWait()
+
+
 if __name__ == '__main__':
     get_voice()
     # while True:
@@ -181,6 +243,7 @@ if __name__ == '__main__':
         qr_scan(a, b)
         clean_temp()
         Config.qr_color = []
+        color_num(a)
     elif flag == "star":
         star_scan(a)
         clean_temp()

@@ -128,7 +128,8 @@ if __name__ == '__main__':
     # 读取视频
     cap = cv2.VideoCapture(Config.src)  # 读取本地测试视频
     # cap = cv2.VideoCapture(0)  # 调用摄像设备
-    # video = "http://192.168.1.100:4747/video"
+    # video = "http://192.168.149.254:4747/video"
+    # video = "http://192.168.43.38:11311"
     # cap = cv2.VideoCapture(video)
 
     # CV识别
