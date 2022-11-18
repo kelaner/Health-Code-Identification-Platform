@@ -77,7 +77,6 @@ def qr_scan(img, barcodes):
             points.append([point[0], point[1]])
         src_rect = order_points(points)
         points = np.array(points, dtype=np.int32)
-        # 框出二维码
         # cv2.polylines(img, [points], isClosed=True, color=(0, 0, 255), thickness=2)
         # cv2.imshow('img', img)
         # cv2.waitKey(0)
@@ -234,6 +233,7 @@ def color_num(image):
 
 
 if __name__ == '__main__':
+    clean_temp()
     get_voice()
     # while True:
     flag, a, b = judge_card()
@@ -241,9 +241,7 @@ if __name__ == '__main__':
 
     if flag == "qr":
         qr_scan(a, b)
-        clean_temp()
         Config.qr_color = []
         color_num(a)
     elif flag == "star":
         star_scan(a)
-        clean_temp()

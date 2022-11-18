@@ -5,13 +5,13 @@ echo "main ok"
 python begin.py &
 echo "scanner system ok"
 
-python scan.py &
+#python scan.py &
 
-#while :
-#do
-#  echo "Get"
-#  python scan.py
-#done
+while :
+do
+  echo "Get"
+  python scan.py
+done
 
 
 

@@ -10,7 +10,7 @@ class Config:
     def __init__(self):
         pass
 
-    src = "./video/demo1.mp4"
+    src = "./video/demo.mp4"
     resizeRate = 1.0  # 缩放
     min_area = 50000  # 区域面积
     min_contours = 100  # 轮廓
@@ -95,8 +95,6 @@ def get_shape(cap):
             contours = contours[:1]
 
             for index, contour in enumerate(contours):
-                if len(contour) < Config.min_contours:
-                    break
                 while True:
                     if contour is None:
                         break
