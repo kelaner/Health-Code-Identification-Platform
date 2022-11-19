@@ -10,11 +10,11 @@ class Config:
     def __init__(self):
         pass
 
-    src = "./video/demo.mp4"
+    src = "./video/demo2.mp4"
     resizeRate = 1.0  # 缩放
-    min_area = 50000  # 区域面积
+    min_area = 100000  # 区域面积
     min_contours = 100  # 轮廓
-    threshold_thresh = 85  # 分类阈值
+    threshold_thresh = 60  # 分类阈值
 
 
 # 坐标点排序 [top-left, top-right, bottom-right, bottom-left]

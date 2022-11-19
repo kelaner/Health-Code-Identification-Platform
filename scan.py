@@ -30,7 +30,7 @@ class Config:
     ocr = PaddleOCR(use_angle_cls=True, lang="ch")
     color_list = ['orange']
     color_num_list = {
-        'orange': {'Lower': np.array([0, 43, 46]), 'Upper': np.array([25, 255, 255])},
+        'orange': {'Lower': np.array([11, 43, 46]), 'Upper': np.array([20, 255, 255])},
     }
 
 
@@ -53,6 +53,8 @@ def clean_temp():
 
 def judge_card():
     for filename in os.listdir(Config.src):
+        Config.engine.say("正在扫描中")
+        Config.engine.runAndWait()
         winsound.Beep(600, 300)
         img = cv2.imread(Config.src + filename, 1)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -100,7 +102,7 @@ def qr_scan(img, barcodes):
                 print(a)
                 Config.engine.say(a)
                 Config.engine.runAndWait()
-            break
+                break
         break
 
 
@@ -199,12 +201,12 @@ def color_num(image):
             box = cv2.boxPoints(rect)
             box = np.int0(box)
             cv2.drawContours(image, [box], -1, (255, 100, 100), 2)
-            # cv2.imshow('camera', image)
-            # cv2.waitKey(0)
             box = box.reshape(4, 2)
             src_rect = order_points(box)
             the_area = math.fabs(cv2.contourArea(src_rect))
-            if 1000 < the_area:
+            if 3000 < the_area:
+                # cv2.imshow('camera', image)
+                # cv2.waitKey(0)
                 orange.append(contour)
     if len(orange) == 0:
         print("24h内为绿码")
