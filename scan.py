@@ -31,7 +31,6 @@ class Config:
     color_list = ['orange']
     color_num_list = {
         'orange': {'Lower': np.array([0, 43, 46]), 'Upper': np.array([25, 255, 255])},
-        'green': {'Lower': np.array([35, 43, 35]), 'Upper': np.array([90, 255, 255])},
     }
 
 
@@ -101,6 +100,7 @@ def qr_scan(img, barcodes):
                 print(a)
                 Config.engine.say(a)
                 Config.engine.runAndWait()
+            break
         break
 
 
@@ -138,9 +138,9 @@ def detect_color(image, color):
 def star_scan(filename):
     file = Config.src + filename
     result = Config.ocr.ocr(file, cls=True)
-    for i in result:
-        for j in i:
-            print(j)
+    # for i in result:
+    #     for j in i:
+    #         print(j)
     star = re.compile(r'[\u4e00-\u9fa5]{7}卡')
 
     t = 0
@@ -198,7 +198,7 @@ def color_num(image):
             rect = cv2.minAreaRect(contour)
             box = cv2.boxPoints(rect)
             box = np.int0(box)
-            # cv2.drawContours(image, [box], -1, (255, 100, 100), 2)
+            cv2.drawContours(image, [box], -1, (255, 100, 100), 2)
             # cv2.imshow('camera', image)
             # cv2.waitKey(0)
             box = box.reshape(4, 2)
@@ -233,7 +233,6 @@ def color_num(image):
 
 
 if __name__ == '__main__':
-    clean_temp()
     get_voice()
     # while True:
     flag, a, b = judge_card()
@@ -243,5 +242,7 @@ if __name__ == '__main__':
         qr_scan(a, b)
         Config.qr_color = []
         color_num(a)
+        clean_temp()
     elif flag == "star":
         star_scan(a)
+        clean_temp()

@@ -78,11 +78,12 @@ def get_warped(w, h, src_rect, frame):
 def get_shape(cap):
     while cap.isOpened():
         ret, frame = cap.read()
+
         if frame is None:
             break
 
         frame = imutils.resize(frame, width=750)
-        frame = imutils.rotate_bound(frame, 90)
+        frame = imutils.rotate_bound(frame, 90)  # 翻转操作
 
         if ret:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
