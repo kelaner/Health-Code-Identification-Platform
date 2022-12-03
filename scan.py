@@ -2,12 +2,12 @@ import re
 import os
 import cv2
 import math
+import datetime
 import logging
 import pyttsx3
 import winsound
 import numpy as np
 import pyzbar.pyzbar as pyzbar
-import matplotlib.pyplot as plt
 from paddleocr import PaddleOCR
 
 # 关闭DEBUG和WARNING
@@ -37,6 +37,8 @@ class Config:
 def get_voice():
     Config.engine.setProperty('rate', 200)  # 设置语速
     Config.engine.setProperty('volume', 2.0)  # 设置音量
+    if not os.path.exists(Config.src):
+        os.mkdir(Config.src)
 
 
 def clean_temp():
@@ -208,6 +210,11 @@ def color_num(image):
                 # cv2.imshow('camera', image)
                 # cv2.waitKey(0)
                 orange.append(contour)
+                if not os.path.exists("./output/orange"):
+                    os.mkdir("./output/orange")
+                time = int(datetime.datetime.now().strftime('%H%M%S'))
+                temp_i = f"{index}_{time}.jpg"
+                cv2.imwrite(f"./output/orange/{temp_i}", image, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
     if len(orange) == 0:
         print("24h内为绿码")
         Config.engine.say("24小时内为绿码")
